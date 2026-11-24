@@ -281,6 +281,33 @@ Every error, including a 401 or 403 from the security filters, uses the same `Ap
 | 409 | Conflict: an overlapping reservation, a room that still has reservations, or a username that is taken |
 | 500 | Unexpected server error (details are logged on the server, never sent to the client) |
 
+## Tests
+
+| Class | Kind | What it checks |
+|---|---|---|
+| `ReservationServiceTest` | service test (JUnit + Mockito, no Spring, no database) | 400, 404, 409, rule C, the owner comes from the login, owner/admin delete, only the owner reschedules |
+| `ApiFailureTest` | API test (`@SpringBootTest` + MockMvc, real MySQL) | 401, 403 (rules C and D), 400 (rule B and validation), 409 (rule A and a room with reservations), 404, 201 — status **and** message |
+
+**Before running:** MySQL must be running, and the `roomdb` data must be the `reset.sql` data
+(the API tests expect mina to own reservation 1). Run `reset.sql` first:
+
+```bash
+mysql -u roomapp -p roomdb < reset.sql
+```
+
+**Run all tests:**
+
+```bash
+./gradlew test        # macOS / Linux
+gradlew.bat test      # Windows
+```
+
+Or in IntelliJ: right-click `src/test/java` → **Run 'All Tests'**.
+The API tests are `@Transactional`, so every change they make is rolled back and the data stays as `reset.sql` left it.
+The report is in `build/reports/tests/test/index.html`.
+
+![All tests passed](docs/test-result.png)
+
 ## AI use
 
 No AI was used in the development of this project.
